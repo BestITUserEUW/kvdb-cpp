@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "KeyValueDatabase",
+            "cppStandard": "c++20",
+            "compilerPath": "/usr/bin/g++",
+            "intelliSenseMode": "${default}",
+            "includePath": ["build/_deps/leveldb-src/include", "build/_deps/reflectcpp-src/include"]
+        }
+    ],
+    "version": 4
+}

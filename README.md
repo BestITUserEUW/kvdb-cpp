@@ -6,10 +6,10 @@ Orm Key Value Database
 
 The following table lists the libraries in use:
 
-| Library                                                          | Version   | License      |
-|------------------------------------------------------------------|-----------|--------------|
-| [reflect-cpp](https://github.com/getml/reflect-cpp/tree/main)    | >= 0.14.1 | MIT          |
-| [leveldb](https://github.com/google/leveldb.git)                 | >= 1.23   | BSD-3-Clause |
+| Library                                                      | Version   | License      |
+|--------------------------------------------------------------|-----------|--------------|
+| [reflect-cpp](https://github.com/getml/reflect-cpp.git)      | >= 0.14.1 | MIT          |
+| [leveldb](https://github.com/google/leveldb.git)             | >= 1.23   | BSD-3-Clause |
 
 
 ## Supported for Types
