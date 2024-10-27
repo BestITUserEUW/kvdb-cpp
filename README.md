@@ -20,11 +20,7 @@ kvdb-cpp supports the following types:
 - `bool`
 - `int`
 - `double`
-
-1. structs / classes serialized with [Reflect Cpp](https://github.com/getml/reflect-cpp.git)
-2. strings
-3. bool
-4. int
+- `structs / classes`
 
 ## Roadmap
 
