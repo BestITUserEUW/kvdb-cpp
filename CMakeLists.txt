@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}
 
 if(KVDB_ENABLE_TESTS)
     set(test_exe ${PROJECT_NAME}_test)
-    add_executable(${test_exe} test/main.cpp)
+    add_executable(${test_exe} test/main.cpp test/read_write.cpp)
     target_link_libraries(${test_exe} PRIVATE ${PROJECT_NAME})
 endif()
 

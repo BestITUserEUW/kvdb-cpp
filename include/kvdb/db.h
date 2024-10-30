@@ -25,7 +25,10 @@ constexpr auto FromChars(std::string_view s) -> std::optional<T> {
 
 template <>
 constexpr auto FromChars<bool>(std::string_view s) -> std::optional<bool> {
-    return FromChars<uint8_t>(s).transform([](uint8_t val) { return static_cast<bool>(val); });
+    if(auto val = FromChars<uint8_t>(s); val.has_value())
+        return static_cast<bool>(val.value());
+    else
+        return std::nullopt;
 }
 
 template <typename T>
