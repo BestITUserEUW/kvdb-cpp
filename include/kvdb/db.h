@@ -44,7 +44,6 @@ auto Read(const std::string& val) -> std::optional<T> {
     } else if constexpr (std::is_integral<_T>()) {
         return FromChars<T>(val);
     } else {
-        auto result = rfl::json::read<T>(val);
         if (auto result = rfl::json::read<T>(val); result) {
             return result.value();
         } else {
