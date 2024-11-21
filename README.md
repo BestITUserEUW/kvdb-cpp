@@ -8,7 +8,7 @@ The following table lists the libraries in use:
 
 | Library                                                      | Version   | License      |
 |--------------------------------------------------------------|-----------|--------------|
-| [reflect-cpp](https://github.com/getml/reflect-cpp.git)      | >= 0.14.1 | MIT          |
+| [reflect-cpp](https://github.com/getml/reflect-cpp.git)      | >= 0.15.0 | MIT          |
 | [leveldb](https://github.com/google/leveldb.git)             | >= 1.23   | BSD-3-Clause |
 
 
@@ -24,7 +24,6 @@ kvdb-cpp supports the following types:
 
 ## Roadmap
 
-- Write Tests with [Doctest](https://github.com/doctest/doctest.git)
 - Examples
 - Add cmake support
 - Docs

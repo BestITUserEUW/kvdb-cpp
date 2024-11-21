@@ -15,7 +15,7 @@ if(KVDB_BUILD_DEPS)
     FetchContent_Declare(
         reflectcpp
         GIT_REPOSITORY https://github.com/getml/reflect-cpp.git
-        GIT_TAG v0.14.1
+        GIT_TAG v0.15.0
         OVERRIDE_FIND_PACKAGE
         EXCLUDE_FROM_ALL
     )
@@ -53,6 +53,6 @@ endif()
 target_include_directories(${PROJECT_NAME}
     INTERFACE
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" 
+        "$<INSTALL_INTERFACE:include>" 
 )
 

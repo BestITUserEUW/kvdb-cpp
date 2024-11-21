@@ -77,14 +77,14 @@ public:
         : db_(nullptr) {}
 
     leveldb::Status Open(const std::string& name, const leveldb::Options& opts = DefaultOptions()) {
-        if (db_ != nullptr) {
+        if (IsOpen()) {
             Close();
         }
         return leveldb::DB::Open(opts, name, &db_);
     }
 
     void Close() {
-        if (db_) {
+        if (IsOpen()) {
             delete db_;
             db_ = nullptr;
         }
@@ -117,6 +117,8 @@ public:
     leveldb::Status Delete(const leveldb::Slice& key, const leveldb::WriteOptions& opts = DefaultWriteOptions()) {
         return db_->Delete(opts, key);
     }
+
+    bool IsOpen() const { return db_ != nullptr; }
 
     static auto DefaultOptions() -> leveldb::Options {
         leveldb::Options opts;
