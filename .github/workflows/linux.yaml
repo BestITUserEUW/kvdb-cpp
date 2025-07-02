@@ -9,23 +9,27 @@ jobs:
       matrix:
         include:
           - compiler: llvm
-            compiler-version: 18
-            cxx: 23
+            compiler-version: 16
+            cxx: 20 
           - compiler: llvm
-            compiler-version: 19
-            cxx: 23
+            compiler-version: 17
+            cxx: 20 
+          - compiler: llvm
+            compiler-version: 18
+            cxx: 20  
           - compiler: gcc
             compiler-version: 11
-            cxx: 20
+            additional-dep: "g++-11"
+            cxx: 20  
           - compiler: gcc
             compiler-version: 12
-            cxx: 20
+            cxx: 20  
           - compiler: gcc
             compiler-version: 13
-            cxx: 20 
+            cxx: 20  
           - compiler: gcc
             compiler-version: 14
-            cxx: 23
+            cxx: 20  
     name: "${{ github.job }} (C++${{ matrix.cxx }}-${{ matrix.compiler }}-${{ matrix.compiler-version }})"
     runs-on: ubuntu-24.04
     steps:
@@ -45,6 +49,10 @@ jobs:
         with:
           key: "${{ github.job }}-${{ matrix.compiler }}-${{ matrix.compiler-version }}"
           max-size: "2G"
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y ninja-build ${{ matrix.additional-dep }}
       - name: Compile
         run: |
           if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
