@@ -29,15 +29,13 @@ if(ORYX_KVDB_BUILD_DEPS)
         OVERRIDE_FIND_PACKAGE
     )
 
-    set(LEVELDB_BUILD_BENCHMARKS OFF)
-    set(LEVELDB_BUILD_TESTS OFF)
+    option(LEVELDB_BUILD_BENCHMARKS "Build LevelDB benchmarks" OFF)
+    option(LEVELDB_BUILD_TESTS "Build LevelDB tests" OFF)
+    #option(REFLECTCPP_INSTALL "Install ReflectCpp" ON)
     FetchContent_MakeAvailable(reflectcpp leveldb)
     
     add_library(reflectcpp::reflectcpp ALIAS reflectcpp)
     add_library(leveldb::leveldb ALIAS leveldb)
-    
-    install(TARGETS reflectcpp EXPORT ${PROJECT_NAME}-exports)
-    install(TARGETS leveldb EXPORT ${PROJECT_NAME}-exports)
 else()
     find_package(reflectcpp CONFIG REQUIRED)
     find_package(leveldb CONFIG REQUIRED)
