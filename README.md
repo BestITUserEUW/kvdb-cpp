@@ -18,12 +18,22 @@ kvdb-cpp supports the following types:
 
 - `std::string`
 - `bool`
-- `int`
-- `double`
-- `structs / classes`
+- `integral types`
+- `floating types`
+- `any that reflect cpp can serialize beyond that`
 
-## Roadmap
+## Build locally
 
-- Examples
-- Add cmake support
-- Docs
+```bash
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -Bbuild -H.
+      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      Only needed for clangd   
+```
+
+```bash
+cmake --build build -j32
+```
+
+## Todo
+
+- Fix install for reflect-cpp

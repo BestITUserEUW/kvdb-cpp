@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(${CMAKE_CURRENT_LIST_DIR}/kvdb-cpp-exports.cmake)
+
+find_dependency(reflectcpp)
+find_dependency(leveldb)
+
+check_required_components(kvdb-cpp)

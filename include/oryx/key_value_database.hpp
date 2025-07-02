@@ -4,14 +4,15 @@
 #include <optional>
 #include <type_traits>
 #include <charconv>
+#include <memory>
 
 #include <leveldb/db.h>
 #include <rfl/Result.hpp>
 #include <rfl/json/write.hpp>
 #include <rfl/json/read.hpp>
 
-namespace st {
-namespace internal {
+namespace oryx {
+namespace detail {
 
 template <typename T>
 constexpr auto FromChars(std::string_view s) -> std::optional<T> {
@@ -25,7 +26,7 @@ constexpr auto FromChars(std::string_view s) -> std::optional<T> {
 
 template <>
 constexpr auto FromChars<bool>(std::string_view s) -> std::optional<bool> {
-    if(auto val = FromChars<uint8_t>(s); val.has_value())
+    if (auto val = FromChars<uint8_t>(s); val.has_value())
         return static_cast<bool>(val.value());
     else
         return std::nullopt;
@@ -69,36 +70,35 @@ auto Write(const T& obj) -> std::string {
     }
 }
 
-}  // namespace internal
+}  // namespace detail
 
-class DB {
+class KeyValueDatabase {
 public:
-    explicit DB()
-        : db_(nullptr) {}
+    KeyValueDatabase() = default;
 
-    leveldb::Status Open(const std::string& name, const leveldb::Options& opts = DefaultOptions()) {
-        if (IsOpen()) {
-            Close();
+    auto Open(const std::string& name, const leveldb::Options& opts = DefaultOptions()) -> leveldb::Status {
+        Close();
+
+        leveldb::DB* db;
+        const auto status = leveldb::DB::Open(opts, name, &db);
+        if (status.ok()) {
+            handle_ = std::unique_ptr<leveldb::DB>(db);
         }
-        return leveldb::DB::Open(opts, name, &db_);
+        return status;
     }
 
-    void Close() {
-        if (IsOpen()) {
-            delete db_;
-            db_ = nullptr;
-        }
-    }
+    void Close() { handle_.reset(); }
 
     template <typename T>
-    leveldb::Status Get(const leveldb::Slice& key, T& val, const leveldb::ReadOptions& opts = DefaultReadOptions()) {
+    auto Get(const leveldb::Slice& key, T& val, const leveldb::ReadOptions& opts = DefaultReadOptions())
+        -> leveldb::Status {
         std::string result;
-        leveldb::Status status = db_->Get(opts, key, &result);
+        leveldb::Status status = handle_->Get(opts, key, &result);
         if (!status.ok()) {
             return status;
         }
 
-        std::optional<T> parsed = internal::Read<T>(result);
+        std::optional<T> parsed = detail::Read<T>(result);
         if (!parsed) {
             return leveldb::Status::IOError("Parse failed");
         }
@@ -108,34 +108,35 @@ public:
     }
 
     template <typename T>
-    leveldb::Status Put(const leveldb::Slice& key,
-                        const T& obj,
-                        const leveldb::WriteOptions& opts = DefaultWriteOptions()) {
-        return db_->Put(opts, key, internal::Write(obj));
+    auto Put(const leveldb::Slice& key, const T& obj, const leveldb::WriteOptions& opts = DefaultWriteOptions())
+        -> leveldb::Status {
+        return handle_->Put(opts, key, detail::Write(obj));
     }
 
-    leveldb::Status Delete(const leveldb::Slice& key, const leveldb::WriteOptions& opts = DefaultWriteOptions()) {
-        return db_->Delete(opts, key);
+    auto Delete(const leveldb::Slice& key, const leveldb::WriteOptions& opts = DefaultWriteOptions())
+        -> leveldb::Status {
+        return handle_->Delete(opts, key);
     }
 
-    bool IsOpen() const { return db_ != nullptr; }
+    [[nodiscard]] auto IsOpen() const { return handle_ != nullptr; }
 
     static auto DefaultOptions() -> leveldb::Options {
-        leveldb::Options opts;
+        leveldb::Options opts{};
         opts.create_if_missing = true;
         opts.reuse_logs = true;
         return opts;
     }
+
     static auto DefaultWriteOptions() -> leveldb::WriteOptions {
-        leveldb::WriteOptions opts;
+        leveldb::WriteOptions opts{};
         opts.sync = true;
         return opts;
     }
-    static auto DefaultReadOptions() -> leveldb::ReadOptions { return leveldb::ReadOptions(); }
 
-    ~DB() { Close(); }
+    static auto DefaultReadOptions() -> leveldb::ReadOptions { return {}; }
 
 private:
-    leveldb::DB* db_;
+    std::unique_ptr<leveldb::DB> handle_{};
 };
-}  // namespace st
+
+}  // namespace oryx
