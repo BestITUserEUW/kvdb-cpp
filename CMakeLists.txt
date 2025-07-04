@@ -4,6 +4,7 @@ project(kvdb-cpp VERSION 0.1.0 LANGUAGES CXX)
 
 option(ORYX_KVDB_ENABLE_TESTS "Build Tests" ON)
 option(ORYX_KVDB_BUILD_DEPS "Build Dependencies from source" ON)
+option(ORYX_KVDB_INSTALL "Install the project" ${PROJECT_IS_TOP_LEVEL})
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT DEFINED CMAKE_CXX_STANDARD)
@@ -18,7 +19,7 @@ if(ORYX_KVDB_BUILD_DEPS)
     FetchContent_Declare(
         reflectcpp
         GIT_REPOSITORY https://github.com/getml/reflect-cpp.git
-        GIT_TAG v0.19.0
+        GIT_TAG 2a0fdeabe35bdab0e07e05d4f869ca88bd6d2b8c
         OVERRIDE_FIND_PACKAGE
     )
 
@@ -31,7 +32,8 @@ if(ORYX_KVDB_BUILD_DEPS)
 
     option(LEVELDB_BUILD_BENCHMARKS "Build LevelDB benchmarks" OFF)
     option(LEVELDB_BUILD_TESTS "Build LevelDB tests" OFF)
-    #option(REFLECTCPP_INSTALL "Install ReflectCpp" ON)
+    option(LEVELDB_INSTALL "Install LevelDB" ${ORYX_KVDB_INSTALL})
+    option(REFLECTCPP_INSTALL "Install ReflectCpp" ${ORYX_KVDB_INSTALL})
     FetchContent_MakeAvailable(reflectcpp leveldb)
     
     add_library(reflectcpp::reflectcpp ALIAS reflectcpp)
@@ -66,7 +68,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 
 target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:-Wall -Wextra>)
 
-if(PROJECT_IS_TOP_LEVEL)
+if(ORYX_KVDB_INSTALL)
     include(GNUInstallDirs)
     include(CMakePackageConfigHelpers)
 

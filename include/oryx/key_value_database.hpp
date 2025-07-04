@@ -118,7 +118,8 @@ public:
         return handle_->Delete(opts, key);
     }
 
-    [[nodiscard]] auto IsOpen() const { return handle_ != nullptr; }
+    [[nodiscard]] auto IsOpen() const -> bool { return static_cast<bool>(handle_); }
+    [[nodiscard]] auto handle() const -> leveldb::DB& { return *handle_; }
 
     static auto DefaultOptions() -> leveldb::Options {
         leveldb::Options opts{};
