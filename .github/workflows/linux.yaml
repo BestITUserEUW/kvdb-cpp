@@ -33,7 +33,7 @@ jobs:
             compiler-version: 14
             cxx: 23  
     name: "${{ github.job }} (C++${{ matrix.cxx }}-${{ matrix.compiler }}-${{ matrix.compiler-version }})"
-    runs-on: ubuntu-25.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
