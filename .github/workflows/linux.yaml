@@ -54,11 +54,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y ninja-build ${{ matrix.deps }}
+          sudo apt install -y ninja-build
           if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
-            sudo apt install -y "clang++-${{ matrix.compiler }}"
+            sudo apt install -y "clang++-${{ compiler-version }}"
           elif [[ "${{ matrix.compiler }}" == "gcc" ]]; then
-            sudo apt install -y "g++-${{ matrix.compiler }}"
+            sudo apt install -y "g++-${{ compiler-version }}"
           fi
       - name: Compile
         run: |
