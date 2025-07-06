@@ -19,10 +19,12 @@ jobs:
             cxx: 20
           - compiler: llvm
             compiler-version: 19
+            deps: "clang-19"
             cxx: 23
           - compiler: gcc
             compiler-version: 11
-            cxx: 20  
+            cxx: 20
+            deps: "g++-11"
           - compiler: gcc
             compiler-version: 12
             cxx: 20  
@@ -54,12 +56,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y ninja-build
-          if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
-            sudo apt install -y "clang++-${{ matrix.compiler-version }}"
-          elif [[ "${{ matrix.compiler }}" == "gcc" ]]; then
-            sudo apt install -y "g++-${{ matrix.compiler-version }}"
-          fi
+          sudo apt install -y ninja-build ${{ matrix.deps }}
       - name: Compile
         run: |
           if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
