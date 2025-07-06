@@ -16,10 +16,12 @@ jobs:
             cxx: 20 
           - compiler: llvm
             compiler-version: 18
-            cxx: 20  
+            cxx: 20
+          - compiler: llvm
+            compiler-version: 19
+            cxx: 23
           - compiler: gcc
             compiler-version: 11
-            additional-dep: "g++-11"
             cxx: 20  
           - compiler: gcc
             compiler-version: 12
@@ -29,9 +31,9 @@ jobs:
             cxx: 20  
           - compiler: gcc
             compiler-version: 14
-            cxx: 20  
+            cxx: 23  
     name: "${{ github.job }} (C++${{ matrix.cxx }}-${{ matrix.compiler }}-${{ matrix.compiler-version }})"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-25.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,7 +54,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y ninja-build ${{ matrix.additional-dep }}
+          sudo apt install -y ninja-build ${{ matrix.deps }}
+          if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
+            sudo apt install "clang++-${{ matrix.compiler }}"
+          elif [[ "${{ matrix.compiler }}" == "gcc" ]]; then
+            sudo apt install "g++-${{ matrix.compiler }}"
+          fi
       - name: Compile
         run: |
           if [[ "${{ matrix.compiler }}" == "llvm" ]]; then
