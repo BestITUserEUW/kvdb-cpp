@@ -62,6 +62,7 @@ TEST_CASE("Reading supported types") {
 
 TEST_CASE("Writing supported types") {
     CHECK_EQ(detail::Write<std::string>("hello world1232!*2`-."), "hello world1232!*2`-.");
+    CHECK_EQ(detail::Write<std::string_view>("hello world1232!*2`-."), "hello world1232!*2`-.");
     CHECK_EQ(detail::Write<bool>(false), "0");
     CHECK_EQ(detail::Write<bool>(true), "1");
     CHECK_EQ(detail::Write<double>(1.256), "1.256000");  // std::to_string appends 0 at the end for some reason

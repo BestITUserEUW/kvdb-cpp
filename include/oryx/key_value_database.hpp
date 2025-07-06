@@ -14,6 +14,12 @@
 namespace oryx {
 namespace detail {
 
+template <typename T, typename... Us>
+struct is_same_r : std::bool_constant<(std::is_same_v<T, Us> || ...)> {};
+
+template <typename T, typename... Us>
+inline constexpr bool is_same_r_v = is_same_r<T, Us...>::value;
+
 template <typename T>
 constexpr auto FromChars(std::string_view s) -> std::optional<T> {
     T val;
@@ -33,18 +39,18 @@ constexpr auto FromChars<bool>(std::string_view s) -> std::optional<bool> {
 }
 
 template <typename T>
-auto Read(const std::string& val) -> std::optional<T> {
+constexpr auto Read(const std::string& val) -> std::optional<T> {
     using _T = std::remove_cvref_t<T>;
 
-    if constexpr (std::is_same<_T, std::string>()) {
+    if constexpr (std::is_same_v<_T, std::string>)
         return val;
-    } else if constexpr (std::is_same<_T, bool>()) {
+    else if constexpr (std::is_same_v<_T, bool>)
         return FromChars<bool>(val);
-    } else if constexpr (std::is_floating_point<_T>()) {
+    else if constexpr (std::is_floating_point_v<_T>)
         return FromChars<T>(val);
-    } else if constexpr (std::is_integral<_T>()) {
+    else if constexpr (std::is_integral_v<_T>)
         return FromChars<T>(val);
-    } else {
+    else {
         if (auto result = rfl::json::read<T>(val); result) {
             return result.value();
         } else {
@@ -54,20 +60,19 @@ auto Read(const std::string& val) -> std::optional<T> {
 }
 
 template <typename T>
-auto Write(const T& obj) -> std::string {
+constexpr auto Write(const T& obj) {
     using _T = std::remove_cvref_t<T>;
 
-    if constexpr (std::is_same<_T, std::string>()) {
+    if constexpr (is_same_r_v<_T, std::string, std::string_view>)
         return obj;
-    } else if constexpr (std::is_same<_T, bool>()) {
+    else if constexpr (std::is_same_v<_T, bool>)
         return std::to_string(static_cast<uint8_t>(obj));
-    } else if constexpr (std::is_floating_point<_T>()) {
+    else if constexpr (std::is_floating_point_v<_T>)
         return std::to_string(obj);
-    } else if constexpr (std::is_integral<_T>()) {
+    else if constexpr (std::is_integral_v<_T>)
         return std::to_string(obj);
-    } else {
+    else
         return rfl::json::write(obj);
-    }
 }
 
 }  // namespace detail
@@ -79,11 +84,15 @@ public:
     auto Open(const std::string& name, const leveldb::Options& opts = DefaultOptions()) -> leveldb::Status {
         Close();
 
+#ifdef __cpp_lib_out_ptr
+        const auto status = leveldb::DB::Open(opts, name, std::out_ptr(handle_));
+#else
         leveldb::DB* db;
         const auto status = leveldb::DB::Open(opts, name, &db);
         if (status.ok()) {
             handle_ = std::unique_ptr<leveldb::DB>(db);
         }
+#endif
         return status;
     }
 
