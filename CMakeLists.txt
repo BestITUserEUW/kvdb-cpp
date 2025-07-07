@@ -66,7 +66,12 @@ target_include_directories(${PROJECT_NAME} INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
-target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:-Wall -Wextra>)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:/W4>)
+else()
+    target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:-Wall -Wextra>)
+endif()
+
 
 if(ORYX_KVDB_INSTALL)
     include(GNUInstallDirs)
