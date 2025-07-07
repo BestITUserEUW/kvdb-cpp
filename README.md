@@ -1,7 +1,7 @@
 # ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white) kvdb-cpp
 
 [![linux](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/linux.yaml/badge.svg)](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/linux.yaml)
-[![linux](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/windows.yaml/badge.svg)](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/windows.yaml)
+[![windows](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/windows.yaml/badge.svg)](https://github.com/BestITUserEUW/kvdb-cpp/actions/workflows/windows.yaml)
 
 Orm Key Value Database
 
@@ -17,13 +17,14 @@ The following table lists the libraries in use:
 
 ## Supported for Types
 
-kvdb-cpp supports the following types:
+kvdb-cpp natively supports the following types:
 
 - `std::string`
 - `bool`
 - `integral types`
 - `floating types`
-- `any that reflect cpp can serialize beyond that`
+
+Anything beyond that will be forwarded to reflect-cpp json serialization and deserialization which supports structs and whole bunch of other stuff check out their: [C++ Standart Support](https://github.com/getml/reflect-cpp?tab=readme-ov-file#support-for-containers)
 
 ## Build locally
 
@@ -37,6 +38,70 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -Bbuild -H.
 cmake --build build -j32
 ```
 
+## Ready to run Example
+
+```cpp
+#include <iostream>
+#include <cassert>
+
+#include <oryx/key_value_database.hpp>
+
+auto main() -> int {
+    oryx::KeyValueDatabase db{};
+
+    auto status = db.Open("./database.ldb");
+    if (!status.ok()) {
+        std::cout << "Failed to open db with error: " << status.ToString() << "\n";
+        return -1;
+    }
+
+    std::string input{"SuperImportantValue"};
+    status = db.Put("my_key", input);
+    if (!status.ok()) {
+        std::cout << "DB put failed" << "\n";
+        return -1;
+    }
+
+    std::string value;
+    status = db.Get("my_key", value);
+    if (!status.ok()) {
+        std::cout << "DB get failed" << "\n";
+        return -1;
+    }
+
+    assert(input == value && "This should not happen!");
+    return 0;
+}
+```
+
+## Cmake Integration
+
+Package is being made available through the oryx namespace use this if you have it installed in your system:
+
+```cmake
+find_package(kvdb-cpp REQUIRED)
+
+target_link_libraries(your_exe oryx::kvdb-cpp)
+```
+
+Or with FetchContent API:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    kvdb-cpp
+    GIT_REPOSITORY https://github.com/BestITUserEUW/kvdb-cpp.git
+    GIT_TAG main
+    OVERRIDE_FIND_PACKAGE
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(kvdb-cpp)
+target_link_libraries(your_exe kvdb-cpp)
+```
+
+Alternatively if you already have leveldb and reflect-cpp linking to your project you can just drop in `include/key_value_database.hpp` into your project.
+
 ## Todo
 
-- Fix install for reflect-cpp
+- Replace std::to_string() for floating point types
+- Add performance benchmarks

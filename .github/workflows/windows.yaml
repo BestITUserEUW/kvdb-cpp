@@ -27,4 +27,4 @@ jobs:
           cmake --build build
       - name: Run tests
         run: |
-          ./build/kvdb-cpp_tests --success
+          .\build\Debug\kvdb-cpp_tests.exe --success
