@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(kvdb-cpp VERSION 0.1.0 LANGUAGES CXX)
+project(kvdb-cpp VERSION 0.4.0 LANGUAGES CXX)
 
 option(ORYX_KVDB_ENABLE_TESTS "Build Tests" ON)
 option(ORYX_KVDB_BUILD_DEPS "Build Dependencies from source" ON)
@@ -19,7 +19,7 @@ if(ORYX_KVDB_BUILD_DEPS)
     FetchContent_Declare(
         reflectcpp
         GIT_REPOSITORY https://github.com/getml/reflect-cpp.git
-        GIT_TAG 2a0fdeabe35bdab0e07e05d4f869ca88bd6d2b8c
+        GIT_TAG v0.21.0
         OVERRIDE_FIND_PACKAGE
     )
 
@@ -36,7 +36,6 @@ if(ORYX_KVDB_BUILD_DEPS)
     option(REFLECTCPP_INSTALL "Install ReflectCpp" ${ORYX_KVDB_INSTALL})
     FetchContent_MakeAvailable(reflectcpp leveldb)
     
-    add_library(reflectcpp::reflectcpp ALIAS reflectcpp)
     add_library(leveldb::leveldb ALIAS leveldb)
 else()
     find_package(reflectcpp CONFIG REQUIRED)
@@ -46,11 +45,38 @@ endif()
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+target_sources(${PROJECT_NAME}
+    INTERFACE
+        FILE_SET HEADERS
+        BASE_DIRS
+            "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/include/oryx/key_value_database.hpp"
+)
+
 target_link_libraries(${PROJECT_NAME}
     INTERFACE 
         reflectcpp::reflectcpp
         leveldb::leveldb
 )
+
+target_include_directories(${PROJECT_NAME} 
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(${PROJECT_NAME} 
+        INTERFACE 
+            $<$<CONFIG:Debug>:/W4>
+    )
+else()
+    target_compile_options(${PROJECT_NAME} 
+        INTERFACE 
+            $<$<CONFIG:Debug>:-Wall -Wextra>
+    )
+endif()
 
 if(ORYX_KVDB_ENABLE_TESTS)
     set(test_exe ${PROJECT_NAME}_tests)
@@ -58,18 +84,10 @@ if(ORYX_KVDB_ENABLE_TESTS)
         tests/main.cpp 
         tests/read_write.cpp
     )
-    target_link_libraries(${test_exe} PRIVATE ${PROJECT_NAME})
-endif()
-
-target_include_directories(${PROJECT_NAME} INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:/W4>)
-else()
-    target_compile_options(${PROJECT_NAME} INTERFACE $<$<CONFIG:Debug>:-Wall -Wextra>)
+    target_link_libraries(${test_exe} 
+        PRIVATE 
+            ${PROJECT_NAME}
+    )
 endif()
 
 
@@ -78,43 +96,35 @@ if(ORYX_KVDB_INSTALL)
     include(CMakePackageConfigHelpers)
 
     configure_package_config_file(
-        cmake/${PROJECT_NAME}-config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
     )
 
     write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
+        COMPATIBILITY ExactVersion
+    )
+
+    install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}-targets
+        FILE_SET HEADERS
     )
 
     install(
         FILES 
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-    )
-
-    file(GLOB_RECURSE KVDB_CPP_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} "${CMAKE_CURRENT_LIST_DIR}/include/*")
-
-    target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET kvdb_cpp_headers
-        TYPE HEADERS
-        BASE_DIRS $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-        FILES ${KVDB_CPP_HEADERS}
+        COMPONENT ${PROJECT_NAME}
     )
 
     install(
-        TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}-exports
-        FILE_SET kvdb_cpp_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-
-    install(
-        EXPORT ${PROJECT_NAME}-exports
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}-targets
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
         NAMESPACE oryx::
+        FILE ${PROJECT_NAME}-targets.cmake
+        COMPONENT ${PROJECT_NAME}
     )
 endif()

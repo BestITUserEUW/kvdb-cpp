@@ -85,15 +85,15 @@ public:
         Close();
 
 #ifdef __cpp_lib_out_ptr
-        const auto status = leveldb::DB::Open(opts, name, std::out_ptr(handle_));
+        return leveldb::DB::Open(opts, name, std::out_ptr(handle_));
 #else
         leveldb::DB* db;
         const auto status = leveldb::DB::Open(opts, name, &db);
         if (status.ok()) {
             handle_ = std::unique_ptr<leveldb::DB>(db);
         }
-#endif
         return status;
+#endif
     }
 
     void Close() { handle_.reset(); }
