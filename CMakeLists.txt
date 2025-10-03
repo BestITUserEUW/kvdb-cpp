@@ -43,7 +43,7 @@ else()
 endif()
 
 add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library("oryx::${PROJECT_NAME}" ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     INTERFACE

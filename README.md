@@ -88,6 +88,7 @@ Or with FetchContent API:
 
 ```cmake
 include(FetchContent)
+
 FetchContent_Declare(
     kvdb-cpp
     GIT_REPOSITORY https://github.com/BestITUserEUW/kvdb-cpp.git
@@ -95,8 +96,13 @@ FetchContent_Declare(
     OVERRIDE_FIND_PACKAGE
     EXCLUDE_FROM_ALL
 )
-FetchContent_MakeAvailable(kvdb-cpp)
-target_link_libraries(your_exe kvdb-cpp)
+FetchContent_MakeAvailable(oryx-crt-cpp)
+
+find_package(kvdb-cpp REQUIRED)
+
+target_link_libraries(my_project PUBLIC
+    oryx::kvdb-cpp
+)
 ```
 
 Alternatively if you already have leveldb and reflect-cpp linking to your project you can just drop in `include/key_value_database.hpp` into your project.
